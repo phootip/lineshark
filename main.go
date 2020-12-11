@@ -1,15 +1,18 @@
 package main
 
 import (
-  "net/http"
-  "github.com/labstack/echo/v4"
+	"fmt"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	
-	"./config"
+
+	"github.com/phootip/lineshark/config"
 )
 
 func main() {
-	config, err := config.InitConfig()
+  config, _ := config.InitConfig()
+  fmt.Println(config)
   // Echo instance
   e := echo.New()
 
