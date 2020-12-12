@@ -1,33 +1,20 @@
 package main
 
 import (
-	"fmt"
+  "fmt"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/phootip/lineshark/config"
+  
+  "github.com/phootip/lineshark/config"
+	"github.com/phootip/lineshark/server"
 )
 
 func main() {
   config, _ := config.InitConfig()
   fmt.Println(config)
-  // Echo instance
-  e := echo.New()
-
-  // Middleware
-  e.Use(middleware.Logger())
-  e.Use(middleware.Recover())
-
-  // Routes
-  e.GET("/", hello)
-
-  // Start server
-	e.Logger.Fatal(e.Start(":1323"))
-}
-
-// Handler
-func hello(c echo.Context) error {
-  return c.String(http.StatusOK, "Hello, World!")
+  server := server.InitServer()
+  
+	option := &http.Server{
+    Addr: config.Address,
+  }
+	server.Logger.Fatal(server.StartServer(option))
 }

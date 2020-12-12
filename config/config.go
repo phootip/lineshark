@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -16,7 +17,9 @@ func InitConfig() (*Configuration, error){
 	fmt.Println("Initializing Config...")
 	_ = godotenv.Load()
 
-	cfg := Configuration{}
+	cfg := Configuration{
+		os.Getenv("ADDRESS"),
+	}
 
 	return &cfg, nil
 }
