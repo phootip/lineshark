@@ -25,7 +25,8 @@ func InitServer() *echo.Echo{
 	
 	Server.GET("/", hello)
 	api := Server.Group("/api")
-  api.GET("/phootip", phootip)
+	api.GET("/phootip", phootip)
+  api.POST("/phootip", phootip)
 	return Server
 }
 
@@ -44,5 +45,8 @@ func hello(c echo.Context) error {
 
 // Handler
 func phootip(c echo.Context) error {
+	name := c.FormValue("name")
+	// temp := []byte{}
+	fmt.Println("Debug: ", name)
   return c.String(http.StatusOK, "Hello, phootip!")
 }
