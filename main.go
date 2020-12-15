@@ -6,13 +6,17 @@ import (
   
   "github.com/phootip/lineshark/config"
 	"github.com/phootip/lineshark/server"
+	"github.com/phootip/lineshark/controller"
+	// "github.com/line/line-bot-sdk-go/linebot"
 )
 
 func main() {
   config, _ := config.InitConfig()
   fmt.Println(config)
   server := server.InitServer()
-  
+  controller.InitLineBot()
+
+  server.POST("/callback",controller.HandlerCallback)
 	option := &http.Server{
     Addr: config.Address,
   }
