@@ -32,4 +32,4 @@ func handlerSms(c echo.Context) error {
 	log.Println("SMS: ", sms)
 	return c.String(http.StatusOK, "Sms received")
 }
-มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.15/12/20@23:04
+// มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.15/12/20@23:04
