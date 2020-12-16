@@ -31,11 +31,6 @@ func InitLineBot() {
 
 // HandlerCallback handle line webhook event
 func HandlerCallback(c echo.Context) error{
-	// m := echo.Map{}
-	// if err := c.Bind(&m); err != nil {
-	// 	return err
-	// }
-	// pretty.Print(m)
 	events, err := Bot.ParseRequest(c.Request())
 	if err != nil {
 		if err == linebot.ErrInvalidSignature {

@@ -17,6 +17,7 @@ func main() {
   controller.InitLineBot()
 
   server.POST("/callback",controller.HandlerCallback)
+  controller.InitAPI(server.Group("/api"))
 	option := &http.Server{
     Addr: config.Address,
   }
