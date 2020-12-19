@@ -7,10 +7,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 	"google.golang.org/api/sheets/v4"
 )
 
@@ -18,6 +22,8 @@ var (
 	// Sheet sigleton
 	Sheet *sheets.Service
 	spreadSheetID string
+	monthToDiscount map[string]int
+	p *message.Printer
 )
 
 // InitSpreadSheetClient init the sheet
@@ -35,6 +41,11 @@ func init() {
 	client := getClient(config)
 	Sheet, err = sheets.New(client)
 	spreadSheetID = os.Getenv("SPREEDSHEET_ID")
+	monthToDiscount = map[string]int{
+		"40เดือน": 50000,
+		"50เดือน": 25000,
+	}
+	p = message.NewPrinter(language.English)
 }
 
 // InitSheetRoute init routing
@@ -51,11 +62,11 @@ func GetReport(id string) ([]byte, error) {
 		log.Println("No data found.")
 	} else {
 		data["id"] = values[0][0].(string)
-		data["monthOrder"] = values[0][2].(string) 
-		data["month"] = values[0][3].(string) 
-		data["expectedAccu"] = values[0][4].(string) 
-		data["paidAccu"] = values[0][5].(string) 
-		data["overdue"] = values[0][6].(string) 
+		data["monthOrder"] = values[0][2].(string)
+		data["month"] = values[0][3].(string)
+		data["expectedAccu"] = values[0][4].(string)
+		data["paidAccu"] = values[0][5].(string)
+		data["overdue"] = values[0][6].(string)
 		if data["overdue"][0] != byte('-') && data["overdue"][0] != byte('0') {
 			data["overdueColor"] = "#FF0000"
 		} else {
@@ -67,8 +78,28 @@ func GetReport(id string) ([]byte, error) {
 	return report, nil
 }
 
-func GetFutureReport(id string, year string) {
-
+func getFutureReport(id string, month string) []byte{
+	discount := monthToDiscount[month]
+	values := getSheetValues(id)
+	data := make(map[string]string)
+	
+	data["month"] = month
+	data["discount"] = p.Sprint(discount)
+	data["id"] = values[0][0].(string)
+	data["monthOrder"] = values[0][2].(string)
+	data["expectedAccu"] = values[0][4].(string)
+	data["paidAccu"] = values[0][5].(string)
+	data["goal"] = values[0][7].(string)
+	
+	goal, _ := strconv.Atoi(strings.ReplaceAll(strings.ReplaceAll(values[0][7].(string), ".00", ""), ",", ""))
+	currentMonth, _ := strconv.Atoi(values[0][2].(string))
+	goalMonth, _ := strconv.Atoi(month[:2])
+	
+	data["newGoal"] = p.Sprint(goal - discount)
+	data["remainingMonth"] = p.Sprint(goalMonth - currentMonth)
+	data["avgInstallment"] = p.Sprint(float64((goal-discount)/(goalMonth-currentMonth)))
+	
+	return FlexMessageFormat(futureTemplate, data)
 }
 
 func handlerWrite(c echo.Context) error {
@@ -108,7 +139,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func getSheetValues(id string) [][]interface{} {
-	readRange := id+"!J2:P2"
+	readRange := id+"!J2:Q2"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
 		log.Printf("Unable to retrieve data from sheet: %v\n", err)

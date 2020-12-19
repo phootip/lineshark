@@ -19,6 +19,7 @@ var (
 	// TestUser my userid for testing
 	TestUser string
 	reportTemplate []byte
+	futureTemplate []byte
 	knownClient map[string]bool
 )
 
@@ -33,6 +34,10 @@ func init() {
 		log.Fatal(err)
 	}
 	reportTemplate, err = ioutil.ReadFile("./template/report.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	futureTemplate, err = ioutil.ReadFile("./template/future-report.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,7 +127,7 @@ func FlexMessageFormat(template []byte, data map[string]string) []byte {
 	msg := make([]byte, len(template))
 	copy(msg, template)
 	for k,v := range data {
-		msg = bytes.Replace(msg, []byte("{"+k+"}"),[]byte(v),1)
+		msg = bytes.ReplaceAll(msg, []byte("{"+k+"}"),[]byte(v))
 	}
 	return msg
 }
@@ -138,8 +143,9 @@ func handlerMessage(message *linebot.TextMessage, replyToken string) {
 		}
 		LineReplyFlex(replyToken, report)
 	case "คำนวณ":
-		// period, id := tokenized[2][:2], tokenized[3]
-		// report := "temp"
+		month, id := tokenized[2], tokenized[3]
+		report := getFutureReport(id, month)
+		LineReplyFlex(replyToken, report)
 	default:
 		LineReplyMessage(replyToken, "Unknown command")
 	}
