@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +17,7 @@ var (
 	Bot *linebot.Client
 	// TestUser my userid for testing
 	TestUser string
+	reportTemplate []byte
 )
 
 func init() {
@@ -25,9 +28,13 @@ func init() {
 		os.Getenv("LINE_TOKEN"),
 	)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	TestUser = os.Getenv("TEST_USER")
+	reportTemplate, err = ioutil.ReadFile("./template/report.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // HandlerCallback handle line webhook event
@@ -51,31 +58,20 @@ func HandlerCallback(c echo.Context) error{
 	return c.String(http.StatusOK, "received")
 }
 
-// LinePushMsg to push message to line
-func LinePushMsg(user string, msg string) {
+// LinePushMessage to push message to line
+func LinePushMessage(user string, msg string) {
 	if _, err := Bot.PushMessage(user, linebot.NewTextMessage(msg)).Do(); err != nil {
 		log.Fatal(err)
 	}
 }
 
 // LinePushReport to push report
-func LinePushReport(user string, id int) error{
-	container := &linebot.BubbleContainer{
-		Type: linebot.FlexContainerTypeBubble,
-		Body: &linebot.BoxComponent{
-			Type:   linebot.FlexComponentTypeBox,
-			Layout: linebot.FlexBoxLayoutTypeHorizontal,
-			Contents: []linebot.FlexComponent{
-				&linebot.TextComponent{
-					Type: linebot.FlexComponentTypeText,
-					Text: "Hello,",
-				},
-				&linebot.TextComponent{
-					Type: linebot.FlexComponentTypeText,
-					Text: "World!",
-				},
-			},
-		},
+func LinePushReport(user string, data map[string]string) error {
+	msg := flexMessageFormat(reportTemplate, data)
+	container, err := linebot.UnmarshalFlexMessageJSON(msg)
+	// err is returned if invalid JSON is given that cannot be unmarshalled
+	if err != nil {
+		log.Fatal(err)
 	}
 	if _, err := Bot.PushMessage(
 		user,
@@ -84,4 +80,13 @@ func LinePushReport(user string, id int) error{
 		return err
 	}
 	return nil
+}
+
+func flexMessageFormat(template []byte, data map[string]string) []byte {
+	msg := make([]byte, len(template))
+	copy(msg, template)
+	for k,v := range data {
+		msg = bytes.Replace(msg, []byte("{"+k+"}"),[]byte(v),1)
+	}
+	return msg
 }

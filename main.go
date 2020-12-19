@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+  "log"
 	"net/http"
   
   "github.com/phootip/lineshark/config"
@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
+  log.SetFlags(log.LstdFlags | log.Lshortfile)
   config, _ := config.InitConfig()
-  fmt.Println(config)
   server := server.Server
 
   server.POST("/callback",controller.HandlerCallback)

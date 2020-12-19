@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -46,24 +45,30 @@ func InitSheetRoute(g *echo.Group) {
 
 func handlerGetReport(c echo.Context) error {
 	id := c.Param("id")
-	readRange := id+"!L2:M2"
+	readRange := id+"!K2:O2"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
 
-	result := ""
+	data := make(map[string]string)
+	data["id"] = id
 	if len(resp.Values) == 0 {
 		log.Println("No data found.")
 	} else {
-		log.Println("Showing read result:")
-		for _, row := range resp.Values {
-			result = fmt.Sprintf("%s, %s\n", row[0], row[1])
+		data["monthOrder"] = resp.Values[0][0].(string)
+		data["month"] = resp.Values[0][1].(string)
+		data["expectedAccu"] = resp.Values[0][2].(string)
+		data["paidAccu"] = resp.Values[0][3].(string)
+		data["overdue"] = resp.Values[0][4].(string)
+		if data["overdue"][0] != byte('-') {
+			data["overdueColor"] = "#FF0000"
+		} else {
+			data["overdueColor"] = "#00FF00"
 		}
 	}
-	// LinePushMsg(TestUser, "hello from LinePushMsg function")
-	LinePushReport(TestUser, 15)
-	return c.String(http.StatusOK, result)
+	LinePushReport(TestUser, data)
+	return c.String(http.StatusOK, "success")
 }
 
 func handlerWrite(c echo.Context) error {
@@ -95,7 +100,7 @@ func getClient(config *oauth2.Config) *http.Client {
 func tokenFromFile(file string) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
-					return nil, err
+		return nil, err
 	}
 	defer f.Close()
 	tok := &oauth2.Token{}

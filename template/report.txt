@@ -1,0 +1,103 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "รายงานที่ดินแปลง {id}",
+        "size": "xl",
+        "weight": "bold",
+        "style": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      }
+    ]
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "baseline",
+        "contents": [
+          {
+            "type": "text",
+            "text": "เดือน {month}"
+          },
+          {
+            "type": "text",
+            "text": "(เดือนที่ {monthOrder})",
+            "color": "#aaaaaa",
+            "align": "end"
+          }
+        ],
+        "margin": "none"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เงินรวมตามสัญญา"
+              },
+              {
+                "type": "text",
+                "text": "{expectedAccu}",
+                "align": "end"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เงินรวมที่จ่ายแล้ว"
+              },
+              {
+                "type": "text",
+                "text": "{paidAccu}",
+                "align": "end"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "ค้างชำระ"
+              },
+              {
+                "type": "text",
+                "text": "{overdue}",
+                "align": "end",
+                "color": "{overdueColor}"
+              }
+            ]
+          }
+        ],
+        "margin": "xxl",
+        "borderWidth": "none",
+        "borderColor": "#000000",
+        "spacing": "none"
+      }
+    ]
+  },
+  "styles": {
+    "header": {
+      "backgroundColor": "#173f5f",
+      "separator": false
+    }
+  }
+}
