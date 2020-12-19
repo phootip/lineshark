@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	// "github.com/kr/pretty"
 	"github.com/labstack/echo/v4"
@@ -50,9 +51,10 @@ func HandlerCallback(c echo.Context) error{
 	}
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
-			log.Print(event.Source.UserID)
-			msg := event.Message.(*linebot.TextMessage)
-			log.Print(msg.Text)
+			switch message := event.Message.(type) {
+			case *linebot.TextMessage:
+				handlerMessage(message, event.ReplyToken)
+			}
 		}
 	}
 	return c.String(http.StatusOK, "received")
@@ -65,9 +67,8 @@ func LinePushMessage(user string, msg string) {
 	}
 }
 
-// LinePushReport to push report
-func LinePushReport(user string, data map[string]string) error {
-	msg := flexMessageFormat(reportTemplate, data)
+// LinePushFlex to push report
+func LinePushFlex(user string, msg []byte) error {
 	container, err := linebot.UnmarshalFlexMessageJSON(msg)
 	// err is returned if invalid JSON is given that cannot be unmarshalled
 	if err != nil {
@@ -82,11 +83,48 @@ func LinePushReport(user string, data map[string]string) error {
 	return nil
 }
 
-func flexMessageFormat(template []byte, data map[string]string) []byte {
+// LineReplyMessage to reply with text
+func LineReplyMessage(replyToken string, msg string) {
+	if _, err := Bot.ReplyMessage(replyToken, linebot.NewTextMessage(msg)).Do(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// LineReplyFlex to reply with flex message
+func LineReplyFlex(replyToken string, msg []byte) error {
+	container, err := linebot.UnmarshalFlexMessageJSON(msg)
+	if err != nil {
+		log.Println(err)
+	}
+	if _, err := Bot.ReplyMessage(
+		replyToken,
+		linebot.NewFlexMessage("alt text", container),
+	).Do(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// FlexMessageFormat litery string interpolation
+func FlexMessageFormat(template []byte, data map[string]string) []byte {
 	msg := make([]byte, len(template))
 	copy(msg, template)
 	for k,v := range data {
 		msg = bytes.Replace(msg, []byte("{"+k+"}"),[]byte(v),1)
 	}
 	return msg
+}
+
+func handlerMessage(message *linebot.TextMessage, replyToken string) {
+	tokenized := strings.Split(message.Text, " ")
+	if tokenized[0] != "lineshark" { return }
+	switch tokenized[1] {
+	case "ดูรายงาน":
+		report, err := GetReport(tokenized[2])
+		if err != nil {
+			LineReplyMessage(replyToken, "Something went wrong")
+		}
+		LineReplyFlex(replyToken, report)
+
+	}
 }

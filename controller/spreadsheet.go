@@ -39,36 +39,36 @@ func init() {
 
 // InitSheetRoute init routing
 func InitSheetRoute(g *echo.Group) {
-	g.GET("/report/:id", handlerGetReport)
 	g.GET("/write", handlerWrite)
-} 
+}
 
-func handlerGetReport(c echo.Context) error {
-	id := c.Param("id")
-	readRange := id+"!K2:O2"
+// GetReport generate monthly report
+func GetReport(id string) ([]byte, error) {
+	readRange := id+"!J2:P2"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
+		log.Printf("Unable to retrieve data from sheet: %v\n", err)
+		return nil, err
 	}
 
 	data := make(map[string]string)
-	data["id"] = id
 	if len(resp.Values) == 0 {
 		log.Println("No data found.")
-	} else {
-		data["monthOrder"] = resp.Values[0][0].(string)
-		data["month"] = resp.Values[0][1].(string)
-		data["expectedAccu"] = resp.Values[0][2].(string)
-		data["paidAccu"] = resp.Values[0][3].(string)
-		data["overdue"] = resp.Values[0][4].(string)
-		if data["overdue"][0] != byte('-') {
+		} else {
+		data["id"] = resp.Values[0][0].(string)
+		data["monthOrder"] = resp.Values[0][2].(string) 
+		data["month"] = resp.Values[0][3].(string) 
+		data["expectedAccu"] = resp.Values[0][4].(string) 
+		data["paidAccu"] = resp.Values[0][5].(string) 
+		data["overdue"] = resp.Values[0][6].(string) 
+		if data["overdue"][0] != byte('-') && data["overdue"][0] != byte('0') {
 			data["overdueColor"] = "#FF0000"
 		} else {
 			data["overdueColor"] = "#00FF00"
 		}
 	}
-	LinePushReport(TestUser, data)
-	return c.String(http.StatusOK, "success")
+	report := FlexMessageFormat(reportTemplate, data)
+	return report, nil
 }
 
 func handlerWrite(c echo.Context) error {
