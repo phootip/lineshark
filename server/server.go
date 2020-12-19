@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/phootip/lineshark/config"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -15,16 +15,14 @@ var (
 	Server *echo.Echo
 )
 
-// InitServer initialize once
-func InitServer() *echo.Echo{
-	fmt.Println("Initialize server")
+func init() {
+	log.Println("Initialize server")
 	
 	Server = echo.New()
 	Server.Use(middleware.Logger())
 	Server.Use(middleware.Recover())
 	
 	Server.GET("/", hello)
-	return Server
 }
 
 // Start to start server

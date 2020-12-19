@@ -13,9 +13,7 @@ import (
 func main() {
   config, _ := config.InitConfig()
   fmt.Println(config)
-  server := server.InitServer()
-  controller.InitLineBot()
-  controller.InitSpreadSheetClient()
+  server := server.Server
 
   server.POST("/callback",controller.HandlerCallback)
   controller.InitAPI(server.Group("/api"))

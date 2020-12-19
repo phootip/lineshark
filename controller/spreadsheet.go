@@ -22,7 +22,7 @@ var (
 )
 
 // InitSpreadSheetClient init the sheet
-func InitSpreadSheetClient() *sheets.Service {
+func init() {
 	log.Println("Initialize SpreadSheet....")
 	b, err := ioutil.ReadFile("credentials/credentials.json")
 	if err != nil {
@@ -36,17 +36,17 @@ func InitSpreadSheetClient() *sheets.Service {
 	client := getClient(config)
 	Sheet, err = sheets.New(client)
 	spreadSheetID = os.Getenv("SPREEDSHEET_ID")
-	return Sheet
 }
 
 // InitSheetRoute init routing
 func InitSheetRoute(g *echo.Group) {
-	g.GET("/report", handlerGetReport)
+	g.GET("/report/:id", handlerGetReport)
 	g.GET("/write", handlerWrite)
 } 
 
 func handlerGetReport(c echo.Context) error {
-	readRange := "Sheet1!A1:B"
+	id := c.Param("id")
+	readRange := id+"!L2:M2"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
@@ -58,10 +58,11 @@ func handlerGetReport(c echo.Context) error {
 	} else {
 		log.Println("Showing read result:")
 		for _, row := range resp.Values {
-			// Print columns A and E, which correspond to indices 0 and 4.
 			result = fmt.Sprintf("%s, %s\n", row[0], row[1])
 		}
 	}
+	// LinePushMsg(TestUser, "hello from LinePushMsg function")
+	LinePushReport(TestUser, 15)
 	return c.String(http.StatusOK, result)
 }
 

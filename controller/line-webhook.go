@@ -13,10 +13,11 @@ import (
 var (
 	// Bot linebot singleton
 	Bot *linebot.Client
+	// TestUser my userid for testing
+	TestUser string
 )
 
-// InitLineBot shutup
-func InitLineBot() {
+func init() {
 	log.Print("Initialize LineBot....")
 	var err error
 	Bot, err = linebot.New(
@@ -24,8 +25,9 @@ func InitLineBot() {
 		os.Getenv("LINE_TOKEN"),
 	)
 	if err != nil {
-		panic("Can't init linebot")
+		panic(err)
 	}
+	TestUser = os.Getenv("TEST_USER")
 }
 
 // HandlerCallback handle line webhook event
@@ -47,4 +49,39 @@ func HandlerCallback(c echo.Context) error{
 		}
 	}
 	return c.String(http.StatusOK, "received")
+}
+
+// LinePushMsg to push message to line
+func LinePushMsg(user string, msg string) {
+	if _, err := Bot.PushMessage(user, linebot.NewTextMessage(msg)).Do(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// LinePushReport to push report
+func LinePushReport(user string, id int) error{
+	container := &linebot.BubbleContainer{
+		Type: linebot.FlexContainerTypeBubble,
+		Body: &linebot.BoxComponent{
+			Type:   linebot.FlexComponentTypeBox,
+			Layout: linebot.FlexBoxLayoutTypeHorizontal,
+			Contents: []linebot.FlexComponent{
+				&linebot.TextComponent{
+					Type: linebot.FlexComponentTypeText,
+					Text: "Hello,",
+				},
+				&linebot.TextComponent{
+					Type: linebot.FlexComponentTypeText,
+					Text: "World!",
+				},
+			},
+		},
+	}
+	if _, err := Bot.PushMessage(
+		user,
+		linebot.NewFlexMessage("alt text", container),
+	).Do(); err != nil {
+		return err
+	}
+	return nil
 }
