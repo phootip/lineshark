@@ -44,31 +44,31 @@ func InitSheetRoute(g *echo.Group) {
 
 // GetReport generate monthly report
 func GetReport(id string) ([]byte, error) {
-	readRange := id+"!J2:P2"
-	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
-	if err != nil {
-		log.Printf("Unable to retrieve data from sheet: %v\n", err)
-		return nil, err
-	}
+	values := getSheetValues(id)
 
 	data := make(map[string]string)
-	if len(resp.Values) == 0 {
+	if len(values) == 0 {
 		log.Println("No data found.")
-		} else {
-		data["id"] = resp.Values[0][0].(string)
-		data["monthOrder"] = resp.Values[0][2].(string) 
-		data["month"] = resp.Values[0][3].(string) 
-		data["expectedAccu"] = resp.Values[0][4].(string) 
-		data["paidAccu"] = resp.Values[0][5].(string) 
-		data["overdue"] = resp.Values[0][6].(string) 
+	} else {
+		data["id"] = values[0][0].(string)
+		data["monthOrder"] = values[0][2].(string) 
+		data["month"] = values[0][3].(string) 
+		data["expectedAccu"] = values[0][4].(string) 
+		data["paidAccu"] = values[0][5].(string) 
+		data["overdue"] = values[0][6].(string) 
 		if data["overdue"][0] != byte('-') && data["overdue"][0] != byte('0') {
 			data["overdueColor"] = "#FF0000"
 		} else {
 			data["overdueColor"] = "#00FF00"
 		}
 	}
+	log.Println(data)
 	report := FlexMessageFormat(reportTemplate, data)
 	return report, nil
+}
+
+func GetFutureReport(id string, year string) {
+
 }
 
 func handlerWrite(c echo.Context) error {
@@ -96,7 +96,6 @@ func getClient(config *oauth2.Config) *http.Client {
 	return config.Client(context.Background(), tok)
 }
 
-
 func tokenFromFile(file string) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
@@ -106,4 +105,14 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	tok := &oauth2.Token{}
 	err = json.NewDecoder(f).Decode(tok)
 	return tok, err
+}
+
+func getSheetValues(id string) [][]interface{} {
+	readRange := id+"!J2:P2"
+	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
+	if err != nil {
+		log.Printf("Unable to retrieve data from sheet: %v\n", err)
+		return nil
+	}
+	return resp.Values
 }

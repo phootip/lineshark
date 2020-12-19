@@ -82,7 +82,8 @@
                 "type": "text",
                 "text": "{overdue}",
                 "align": "end",
-                "color": "{overdueColor}"
+                "color": "{overdueColor}",
+                "weight": "bold"
               }
             ]
           }

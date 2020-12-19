@@ -19,6 +19,7 @@ var (
 	// TestUser my userid for testing
 	TestUser string
 	reportTemplate []byte
+	knownClient map[string]bool
 )
 
 func init() {
@@ -31,10 +32,14 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	TestUser = os.Getenv("TEST_USER")
 	reportTemplate, err = ioutil.ReadFile("./template/report.txt")
 	if err != nil {
 		log.Fatal(err)
+	}
+	TestUser = os.Getenv("TEST_USER")
+	knownClient = map[string]bool{
+		TestUser: true,
+		os.Getenv("TEST_GROUP"): true,
 	}
 }
 
@@ -50,7 +55,10 @@ func HandlerCallback(c echo.Context) error{
 		return err
 	}
 	for _, event := range events {
-		if event.Source.UserID != TestUser {
+		// log.Println("Sender user: ", event.Source.UserID)
+		// log.Println("Sender group: ", event.Source.GroupID)
+		if !(knownClient[event.Source.UserID] || knownClient[event.Source.GroupID]) {
+			log.Println("User not allowed")
 			return c.String(http.StatusOK, "Your Line user is not allowed") 
 		}
 		if event.Type == linebot.EventTypeMessage {
@@ -96,12 +104,14 @@ func LineReplyMessage(replyToken string, msg string) {
 func LineReplyFlex(replyToken string, msg []byte) error {
 	container, err := linebot.UnmarshalFlexMessageJSON(msg)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	if _, err := Bot.ReplyMessage(
 		replyToken,
 		linebot.NewFlexMessage("alt text", container),
 	).Do(); err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
@@ -127,5 +137,10 @@ func handlerMessage(message *linebot.TextMessage, replyToken string) {
 			LineReplyMessage(replyToken, "Something went wrong")
 		}
 		LineReplyFlex(replyToken, report)
+	case "คำนวณ":
+		// period, id := tokenized[2][:2], tokenized[3]
+		// report := "temp"
+	default:
+		LineReplyMessage(replyToken, "Unknown command")
 	}
 }

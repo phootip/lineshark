@@ -1,0 +1,169 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "คำนวณผ่อนจบ 40ปี",
+        "size": "xl",
+        "weight": "bold",
+        "style": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      },
+      {
+        "type": "text",
+        "text": "ที่ดินแปลงที่ 17",
+        "size": "xl",
+        "weight": "bold",
+        "style": "normal",
+        "align": "center",
+        "color": "#FFFFFF"
+      }
+    ]
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "baseline",
+        "contents": [
+          {
+            "type": "text",
+            "text": "ส่วนลด"
+          },
+          {
+            "type": "text",
+            "text": "{discount}",
+            "align": "end"
+          }
+        ],
+        "margin": "none"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เงินรวมตามสัญญา"
+              },
+              {
+                "type": "text",
+                "text": "550,000",
+                "align": "end"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "baseline",
+            "contents": [
+              {
+                "type": "text",
+                "text": "(600,000 - 50,000)",
+                "align": "end",
+                "size": "xxs",
+                "color": "#888888"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เงินรวมที่จ่ายแล้ว"
+              },
+              {
+                "type": "text",
+                "text": "15,000",
+                "align": "end"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "เดือนที่เหลือ"
+              },
+              {
+                "type": "text",
+                "text": "37",
+                "align": "end",
+                "color": "#00FF00"
+              }
+            ]
+          }
+        ],
+        "margin": "xl",
+        "borderWidth": "none",
+        "borderColor": "#000000",
+        "spacing": "none"
+      }
+    ]
+  },
+  "footer": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "เฉลี่ยต้องผ่อนเดือนละ",
+            "size": "xl",
+            "color": "#FFFFFF",
+            "align": "center",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "text": "10,000",
+            "align": "center",
+            "size": "xl",
+            "weight": "bold",
+            "color": "#FFFFFF"
+          }
+        ],
+        "margin": "xl"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "(550,000 - 15,000) / 37",
+            "size": "xxs",
+            "align": "end",
+            "color": "#cccccc"
+          }
+        ]
+      }
+    ]
+  },
+  "styles": {
+    "header": {
+      "backgroundColor": "#583d72",
+      "separator": false
+    },
+    "footer": {
+      "backgroundColor": "#9f5f80"
+    }
+  }
+}
