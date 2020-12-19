@@ -11,14 +11,13 @@ import (
 )
 
 var (
-	// Bot shutup
+	// Bot linebot singleton
 	Bot *linebot.Client
 )
 
 // InitLineBot shutup
 func InitLineBot() {
-	log.Print("Initialize LineBot")
-	log.Print(os.Getenv("LINE_SECRET"),os.Getenv("LINE_TOKEN"))
+	log.Print("Initialize LineBot....")
 	var err error
 	Bot, err = linebot.New(
 		os.Getenv("LINE_SECRET"),

@@ -15,9 +15,11 @@ func main() {
   fmt.Println(config)
   server := server.InitServer()
   controller.InitLineBot()
+  controller.InitSpreadSheetClient()
 
   server.POST("/callback",controller.HandlerCallback)
   controller.InitAPI(server.Group("/api"))
+  controller.InitSheetRoute(server.Group("/sheet"))
 	option := &http.Server{
     Addr: config.Address,
   }
