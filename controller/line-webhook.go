@@ -50,6 +50,9 @@ func HandlerCallback(c echo.Context) error{
 		return err
 	}
 	for _, event := range events {
+		if event.Source.UserID != TestUser {
+			return c.String(http.StatusOK, "Your Line user is not allowed") 
+		}
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
@@ -70,7 +73,6 @@ func LinePushMessage(user string, msg string) {
 // LinePushFlex to push report
 func LinePushFlex(user string, msg []byte) error {
 	container, err := linebot.UnmarshalFlexMessageJSON(msg)
-	// err is returned if invalid JSON is given that cannot be unmarshalled
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,7 +96,7 @@ func LineReplyMessage(replyToken string, msg string) {
 func LineReplyFlex(replyToken string, msg []byte) error {
 	container, err := linebot.UnmarshalFlexMessageJSON(msg)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 	if _, err := Bot.ReplyMessage(
 		replyToken,
@@ -125,6 +127,5 @@ func handlerMessage(message *linebot.TextMessage, replyToken string) {
 			LineReplyMessage(replyToken, "Something went wrong")
 		}
 		LineReplyFlex(replyToken, report)
-
 	}
 }
