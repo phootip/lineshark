@@ -18,6 +18,7 @@ import (
 var (
 	// Sheet sigleton
 	Sheet *sheets.Service
+	spreadSheetID string
 )
 
 // InitSpreadSheetClient init the sheet
@@ -28,23 +29,23 @@ func InitSpreadSheetClient() *sheets.Service {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
-	
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 	
 	client := getClient(config)
 	Sheet, err = sheets.New(client)
+	spreadSheetID = os.Getenv("SPREEDSHEET_ID")
 	return Sheet
 }
 
 // InitSheetRoute init routing
 func InitSheetRoute(g *echo.Group) {
 	g.GET("/report", handlerGetReport)
+	g.GET("/write", handlerWrite)
 } 
 
 func handlerGetReport(c echo.Context) error {
-	spreadSheetID := os.Getenv("SPREEDSHEET_ID")
 	readRange := "Sheet1!A1:B"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
@@ -62,6 +63,19 @@ func handlerGetReport(c echo.Context) error {
 		}
 	}
 	return c.String(http.StatusOK, result)
+}
+
+func handlerWrite(c echo.Context) error {
+	writeRange := "A3"
+	var vr sheets.ValueRange
+	myval := []interface{}{`=IMAGE("http://finviz.com/fut_chart.ashx?t=ES&p&p=m5&s=m",4,100,200)`}
+	vr.Values = append(vr.Values, myval)
+	_, err := Sheet.Spreadsheets.Values.Update(spreadSheetID, writeRange, &vr).ValueInputOption("RAW").Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+		return err
+	}
+	return c.String(http.StatusOK, "value written")
 }
 
 func getClient(config *oauth2.Config) *http.Client {
@@ -87,5 +101,3 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	err = json.NewDecoder(f).Decode(tok)
 	return tok, err
 }
-
-func renewToken()
