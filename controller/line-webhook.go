@@ -69,7 +69,9 @@ func HandlerCallback(c echo.Context) error{
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				handlerMessage(message, event.ReplyToken)
+				handlerTextMessage(message, event.ReplyToken)
+			case *linebot.ImageMessage:
+				handlerImageMessage(message, event.ReplyToken)
 			}
 		}
 	}
@@ -132,7 +134,7 @@ func FlexMessageFormat(template []byte, data map[string]string) []byte {
 	return msg
 }
 
-func handlerMessage(message *linebot.TextMessage, replyToken string) {
+func handlerTextMessage(message *linebot.TextMessage, replyToken string) {
 	tokenized := strings.Split(message.Text, " ")
 	if tokenized[0] != "lineshark" { return }
 	switch tokenized[1] {
@@ -149,4 +151,8 @@ func handlerMessage(message *linebot.TextMessage, replyToken string) {
 	default:
 		LineReplyMessage(replyToken, "Unknown command")
 	}
+}
+
+func handlerImageMessage(message *linebot.ImageMessage, replyToken string){
+	LineReplyMessage(replyToken, "you send an image")
 }

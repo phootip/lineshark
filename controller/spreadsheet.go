@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -10,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/context"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

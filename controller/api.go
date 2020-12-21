@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	// "github.com/kr/pretty"
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/otiai10/gosseract"
 )
 
 // InitAPI add /util to the server
@@ -32,4 +32,18 @@ func handlerSms(c echo.Context) error {
 	log.Println("SMS: ", sms)
 	return c.String(http.StatusOK, "Sms received")
 }
-// มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.15/12/20@23:04
+// มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.@23:04
+
+// DetectText detect text from image
+func detectText(file string) string {
+	client := gosseract.NewClient()
+	defer client.Close()
+	client.SetImage(file)
+	client.Languages = []string{"eng","tha"}
+	text, err := client.Text()
+	if err != nil {
+		log.Println(err)
+	}
+	return text
+}
+
