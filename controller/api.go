@@ -32,13 +32,13 @@ func handlerSms(c echo.Context) error {
 	log.Println("SMS: ", sms)
 	return c.String(http.StatusOK, "Sms received")
 }
-// มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.@23:04
+// มีเงิน 3.00บ.เข้าบ/ชxx5340เหลือ 50,006.00 บ.15/12/20@23:04
 
 // DetectText detect text from image
-func detectText(file string) string {
+func detectText(image []byte) string {
 	client := gosseract.NewClient()
 	defer client.Close()
-	client.SetImage(file)
+	client.SetImageFromBytes(image)
 	client.Languages = []string{"eng","tha"}
 	text, err := client.Text()
 	if err != nil {
@@ -47,3 +47,7 @@ func detectText(file string) string {
 	return text
 }
 
+// Temp for testing
+func Temp() {
+	
+}

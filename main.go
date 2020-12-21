@@ -21,5 +21,8 @@ func main() {
 	option := &http.Server{
     Addr: config.Address,
   }
+
+  controller.Temp()
+
 	server.Logger.Fatal(server.StartServer(option))
 }

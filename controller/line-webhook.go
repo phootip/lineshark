@@ -154,5 +154,14 @@ func handlerTextMessage(message *linebot.TextMessage, replyToken string) {
 }
 
 func handlerImageMessage(message *linebot.ImageMessage, replyToken string){
+	log.Println("MessageID: ", message.ID)
+	content, err := Bot.GetMessageContent(message.ID).Do()
+	if err != nil {
+		log.Println(err)
+	}
+	defer content.Content.Close()
+	image, err := ioutil.ReadAll(content.Content)
+	text := detectText(image)
+	log.Println(text)
 	LineReplyMessage(replyToken, "you send an image")
 }
