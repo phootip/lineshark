@@ -23,6 +23,8 @@ var (
 	Sheet *sheets.Service
 	spreadSheetID string
 	monthToDiscount map[string]int
+	monthThai []string
+	monthEng []string
 	p *message.Printer
 )
 
@@ -45,6 +47,8 @@ func init() {
 		"40เดือน": 50000,
 		"50เดือน": 25000,
 	}
+	monthThai = []string{"ม . ค .", "ก . พ .", "มี . ค .", "เม . ย .", "พ . ค .", "มิ . ค .", "ก . ค .", "ส . ค .", "ก . ย .", "ต . ค .", "พ . ย .", "ธ . ค ."}
+	monthEng = []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 	p = message.NewPrinter(language.English)
 }
 
