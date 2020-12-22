@@ -1,17 +1,17 @@
 package controller
 
 import (
+	"image"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
+
+	_ "image/jpeg"
 
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/linebot"
-	"github.com/otiai10/gosseract"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
 )
 
 // InitAPI add /util to the server
@@ -41,31 +41,22 @@ func handlerSms(c echo.Context) error {
 //  20,000.00
 
 // DetectText detect text from image
-func detectText(image []byte) string {
-	client := gosseract.NewClient()
-	defer client.Close()
-	client.SetImageFromBytes(image)
-	client.Languages = []string{"eng","tha"}
-	text, err := client.Text()
-	if err != nil {
-		log.Println(err)
-	}
-	return text
-}
 
 // Temp for testing
 func Temp() {
-	rawData := `@ โอ น เง ิ น ส ํ า เร ็ จ
-	30 พ . ย . 2563 - 12:46
-	avid WN: 202011300JkFxhHkucr8akDIz
-	`
-	_ = rawData
-	r, _ := regexp.Compile("[0-9]{2,4} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(ธ . ค .)) [0-9]{2,4}")
-	str := r.FindString(rawData)
-	log.Println(str)
-	rawDate := "30 พ . ย . 2563"
-	rawTime := "12:46"
-	monthThaiToEng(rawDate, rawTime)
+	file, err := os.Open("template/example2.jpg")
+	if err != nil {
+		log.Println(err)
+	}
+	img, _, err := image.Decode(file)
+	if err != nil {
+		log.Println(err)
+	}
+	bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+	qrReader := qrcode.NewQRCodeReader()
+	result, _ := qrReader.Decode(bmp, nil)
+	log.Println(result.String())
+	
 	// writeRange := "A3"
 	// var vr sheets.ValueRange
 	
@@ -77,29 +68,4 @@ func Temp() {
 	// 	return err
 	// }
 	// return c.String(http.StatusOK, "value written")
-}
-
-func monthThaiToEng(rawDate string, rawTime string) {
-	date := rawDate
-	for i := range monthThai {
-		date = strings.ReplaceAll(date, monthThai[i], monthEng[i])
-	}
-	temp := strings.Split(date, " ")
-	if len(temp[2]) == 4 {
-		temp[2] = temp[2][2:]
-	}
-	temp2, _ := strconv.Atoi(temp[2])
-	temp[2] = strconv.Itoa(temp2 - 43)
-
-	date = strings.Join(temp, " ")
-	date += ", " + rawTime
-	log.Println(date)
-	layout := "2 Jan 06, 15:04"
-	t, err := time.Parse(layout, date)
-	if err != nil {
-			log.Println(err)
-	}
-	newLayout := "2/1/06 15:04"
-	date = t.Format(newLayout)
-	log.Println(date)
 }

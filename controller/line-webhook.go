@@ -2,15 +2,19 @@ package controller
 
 import (
 	"bytes"
+	"image"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
-	// "github.com/kr/pretty"
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
+	"github.com/otiai10/gosseract"
 )
 
 var (
@@ -160,8 +164,40 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string){
 		log.Println(err)
 	}
 	defer content.Content.Close()
-	image, err := ioutil.ReadAll(content.Content)
-	text := detectText(image)
-	log.Println(text)
+	buffer, _ := ioutil.ReadAll(content.Content)
+	rawDate := decodeDate(buffer)
+	rawTime := decodeTime(buffer)
+	log.Println(rawDate)
+	log.Println(rawTime)
 	LineReplyMessage(replyToken, "you send an image")
+}
+
+func decodeDate(file []byte) string{
+	img, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		log.Println(err)
+	}
+	bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+	qrReader := qrcode.NewQRCodeReader()
+	result, _ := qrReader.Decode(bmp, nil)
+	return result.String()
+}
+
+func decodeTime(file []byte) string{
+	text := detectText(file)
+	timeReg, _ := regexp.Compile("[0-9]{2}:[0-9]{2}")
+	return timeReg.FindString(text)
+}
+
+
+func detectText(image []byte) string {
+	client := gosseract.NewClient()
+	defer client.Close()
+	client.SetImageFromBytes(image)
+	client.Languages = []string{"eng","tha"}
+	text, err := client.Text()
+	if err != nil {
+		log.Println(err)
+	}
+	return text
 }

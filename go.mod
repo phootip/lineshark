@@ -8,6 +8,7 @@ require (
 	github.com/kr/pretty v0.2.1
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/line/line-bot-sdk-go v7.7.0+incompatible
+	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
 	github.com/otiai10/gosseract v2.2.1+incompatible
 	github.com/otiai10/mint v1.3.2 // indirect
 	golang.org/x/net v0.0.0-20201216054612-986b41b23924
