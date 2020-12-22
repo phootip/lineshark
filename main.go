@@ -1,12 +1,12 @@
 package main
 
 import (
-  "log"
+	"log"
 	"net/http"
-  
-  "github.com/phootip/lineshark/config"
-	"github.com/phootip/lineshark/server"
+
+	"github.com/phootip/lineshark/config"
 	"github.com/phootip/lineshark/controller"
+	"github.com/phootip/lineshark/server"
 	// "github.com/line/line-bot-sdk-go/linebot"
 )
 

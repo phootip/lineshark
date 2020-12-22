@@ -2,13 +2,16 @@ package controller
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/linebot"
@@ -157,7 +160,7 @@ func handlerTextMessage(message *linebot.TextMessage, replyToken string) {
 	}
 }
 
-func handlerImageMessage(message *linebot.ImageMessage, replyToken string){
+func handlerImageMessage(message *linebot.ImageMessage, replyToken string) {
 	log.Println("MessageID: ", message.ID)
 	content, err := Bot.GetMessageContent(message.ID).Do()
 	if err != nil {
@@ -165,22 +168,44 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string){
 	}
 	defer content.Content.Close()
 	buffer, _ := ioutil.ReadAll(content.Content)
-	rawDate := decodeDate(buffer)
+	rawDate, err := decodeDate(buffer)
+	if err != nil {
+		log.Printf("%v, %t",err, err)
+		return
+	}
 	rawTime := decodeTime(buffer)
 	log.Println(rawDate)
 	log.Println(rawTime)
-	LineReplyMessage(replyToken, "you send an image")
+	rawDate += ", " + rawTime
+	layout := "20060102, 15:04"
+	t, err := time.Parse(layout, rawDate)
+	if err != nil {
+			log.Println(err)
+	}
+	newLayout := "1/2/2006 15:04"
+	date := t.Format(newLayout)
+	result := fmt.Sprintf("The scraped data is : %v", date)
+	LineReplyMessage(replyToken, result)
 }
 
-func decodeDate(file []byte) string{
+func decodeDate(file []byte) (string, error) {
 	img, _, err := image.Decode(bytes.NewReader(file))
 	if err != nil {
-		log.Println(err)
+		return "", err
 	}
-	bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+	bmp, err := gozxing.NewBinaryBitmapFromImage(img)
+	if err != nil {
+		return "", err
+	}
 	qrReader := qrcode.NewQRCodeReader()
-	result, _ := qrReader.Decode(bmp, nil)
-	return result.String()
+	result, err := qrReader.Decode(bmp, nil)
+	if err != nil {
+		return "", err
+	}
+	code := result.String()
+	temp := findTag(code, "00")
+	temp = findTag(temp, "02")
+	return temp[:8], nil
 }
 
 func decodeTime(file []byte) string{
@@ -201,3 +226,19 @@ func detectText(image []byte) string {
 	}
 	return text
 }
+
+func findTag(code string, tag string) string{
+	pos := 0
+	for i := 0; i < len(code); i++ {
+		if code[i:i+2] != tag {
+			i += 2
+			skip, _ := strconv.Atoi(code[i:i+2])
+			i += skip + 1
+			continue
+		}
+		pos = i + 4
+		break
+	}
+	return code[pos:]
+}
+

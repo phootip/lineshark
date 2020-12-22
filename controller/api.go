@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"image"
 	"log"
 	"net/http"
 	"os"
@@ -10,8 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/line/line-bot-sdk-go/linebot"
-	"github.com/makiuchi-d/gozxing"
-	"github.com/makiuchi-d/gozxing/qrcode"
 )
 
 // InitAPI add /util to the server
@@ -44,19 +41,6 @@ func handlerSms(c echo.Context) error {
 
 // Temp for testing
 func Temp() {
-	file, err := os.Open("template/example2.jpg")
-	if err != nil {
-		log.Println(err)
-	}
-	img, _, err := image.Decode(file)
-	if err != nil {
-		log.Println(err)
-	}
-	bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
-	qrReader := qrcode.NewQRCodeReader()
-	result, _ := qrReader.Decode(bmp, nil)
-	log.Println(result.String())
-	
 	// writeRange := "A3"
 	// var vr sheets.ValueRange
 	
