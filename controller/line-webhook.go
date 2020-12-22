@@ -28,6 +28,8 @@ var (
 	reportTemplate []byte
 	futureTemplate []byte
 	knownClient map[string]bool
+	monthThai = [12]string{"ม . ค .", "ก . พ .", "มี . ค .", "เม . ย .", "พ . ค .", "มิ . ค .", "ก . ค .", "ส . ค .", "ก . ย .", "ต . ค .", "พ . ย .", "ธ . ค ."}
+	monthEng = [12]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 )
 
 func init() {
@@ -168,14 +170,26 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string) {
 	}
 	defer content.Content.Close()
 	buffer, _ := ioutil.ReadAll(content.Content)
-	rawDate, err := decodeDate(buffer)
+	text := detectText(buffer)
+	rawDate, err := qrToDate(buffer)
 	if err != nil {
-		log.Printf("%v, %t",err, err)
-		return
+		if err.Error() == "NotFoundException: startSize = 0" {
+			log.Println("No QRcode found, trying OCR...")
+			rawDate = detectDate(text)
+			if len(rawDate) == 0 {
+				log.Println("No Date, skip")
+				return
+			}
+			rawDate = monthThaiToEng(rawDate)
+		} else {
+			log.Printf("%v, %t",err, err)
+		}
 	}
-	rawTime := decodeTime(buffer)
+	rawTime := detectTime(text)
+	rawAmount := detectAmount(text)
 	log.Println(rawDate)
 	log.Println(rawTime)
+	log.Println(rawAmount)
 	rawDate += ", " + rawTime
 	layout := "20060102, 15:04"
 	t, err := time.Parse(layout, rawDate)
@@ -184,11 +198,12 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string) {
 	}
 	newLayout := "1/2/2006 15:04"
 	date := t.Format(newLayout)
-	result := fmt.Sprintf("The scraped data is : %v", date)
+	data := date + " - " + rawAmount
+	result := fmt.Sprintf("The scraped data is : %v", data)
 	LineReplyMessage(replyToken, result)
 }
 
-func decodeDate(file []byte) (string, error) {
+func qrToDate(file []byte) (string, error) {
 	img, _, err := image.Decode(bytes.NewReader(file))
 	if err != nil {
 		return "", err
@@ -208,12 +223,20 @@ func decodeDate(file []byte) (string, error) {
 	return temp[:8], nil
 }
 
-func decodeTime(file []byte) string{
-	text := detectText(file)
+func detectDate(text string) string{
+	dateReg, _ := regexp.Compile("[0-9]{2,4} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(ธ . ค .)) [0-9]{2,4}")
+	return dateReg.FindString(text)
+}
+
+func detectTime(text string) string{
 	timeReg, _ := regexp.Compile("[0-9]{2}:[0-9]{2}")
 	return timeReg.FindString(text)
 }
 
+func detectAmount(text string) string {
+	amountReg, _ := regexp.Compile("[0-9]{1,3},[0-9]{3}.[0-9]{2}")
+	return amountReg.FindString(text)
+}
 
 func detectText(image []byte) string {
 	client := gosseract.NewClient()
@@ -242,3 +265,22 @@ func findTag(code string, tag string) string{
 	return code[pos:]
 }
 
+func monthThaiToEng(rawDate string) string {
+	date := rawDate
+	for i := range monthThai {
+		date = strings.ReplaceAll(date, monthThai[i], monthEng[i])
+	}
+	temp := strings.Split(date, " ")
+	if len(temp[2]) == 4 {
+		temp[2] = temp[2][2:]
+	}
+	temp2, _ := strconv.Atoi(temp[2])
+	temp[2] = strconv.Itoa(temp2 - 43)
+
+	date = strings.Join(temp, " ")
+	log.Println(date)
+	layout := "2 Jan 06"
+	t, _ := time.Parse(layout, date)
+	newLayout := "20060102"
+	return t.Format(newLayout)
+}
