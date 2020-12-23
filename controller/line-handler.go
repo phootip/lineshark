@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"strings"
 
+	"github.com/kr/pretty"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/phootip/lineshark/template"
 )
 
 
@@ -41,13 +43,29 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userI
 	if !ok {
 		return
 	}
-	newLayout := "2 jan 2006 15:04"
-	dateStr := date.Format(newLayout)
+	parcel := clientParcel[userID]
+	humanLayout := "2 jan 2006, 15:04"
+	dateStr := date.Format(humanLayout)
 
-	leftBtn := linebot.NewMessageAction("Yes", "Yes clicked")
-	rightBtn := linebot.NewMessageAction("No", "No clicked")
-	temp := fmt.Sprintf("บันทึกวันที่ %v \n จำนวนเงิน %v \n ให้แปลงที่ %v ?",dateStr,amount,clientParcel[userID])
-	template := linebot.NewConfirmTemplate(temp, leftBtn, rightBtn)// New TemplateMessage
-	msg := linebot.NewTemplateMessage("Confirm Box.", template)// Reply Message
-	Bot.ReplyMessage(replyToken, msg).Do()
+	sheetLayout := "1/2/2006 15:04"
+	dateSheet := date.Format(sheetLayout)
+	data := map[string]string{
+		"parcel": parcel,
+		"dateStr": dateStr,
+		"amount": amount,
+		"date": dateSheet,
+	}
+	flexMsg := template.ConfirmTemplate(data)
+	if _, err := Bot.PushMessage(TestUser, flexMsg).Do(); err != nil {
+		log.Println(err)
+	}
+	_, _, _ = parcel,dateStr, amount
+	// Bot.ReplyMessage(replyToken, msg).Do()
+}
+
+func handlerPostback(event *linebot.Event) {
+	log.Println(event.Postback.Data)
+	data := make(map[string]string)
+	json.Unmarshal([]byte(event.Postback.Data), &data)
+	pretty.Print(data)
 }

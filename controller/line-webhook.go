@@ -68,10 +68,14 @@ func HandlerCallback(c echo.Context) error{
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
+				log.Println(message.Text)
 				handlerTextMessage(message, event.ReplyToken)
 			case *linebot.ImageMessage:
 				handlerImageMessage(message, event.ReplyToken, event.Source.UserID)
 			}
+		}
+		if event.Type == linebot.EventTypePostback {
+			handlerPostback(event)
 		}
 	}
 	return c.String(http.StatusOK, "received")

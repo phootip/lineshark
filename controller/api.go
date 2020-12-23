@@ -41,6 +41,7 @@ func handlerSms(c echo.Context) error {
 
 // Temp for testing
 func Temp() {
+	log.Println("running Temp func....")
 	// writeRange := "A3"
 	// var vr sheets.ValueRange
 	
