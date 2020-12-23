@@ -139,7 +139,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func getSheetValues(id string) [][]interface{} {
-	readRange := id+"!J2:Q2"
+	readRange := id+"!A71:H71"
 	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
 		log.Printf("Unable to retrieve data from sheet: %v\n", err)
