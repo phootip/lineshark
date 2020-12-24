@@ -42,7 +42,7 @@ func handlerSms(c echo.Context) error {
 // Temp for testing
 func Temp() {
 	log.Println("running Temp func....")
-	log.Println(uploadEvidence("./template/example.jpg"))
+	// log.Println(uploadEvidence("./template/example2.jpg"))
 	// data := map[string]string{
 	// 	"amount":"10,000.00", 
 	// 	"date":"11/29/2020 10:07:00", 

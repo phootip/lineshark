@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"image"
+	"io/ioutil"
 	"log"
 	"regexp"
 	"strconv"
@@ -15,12 +16,23 @@ import (
 )
 
 var (
-	monthThai = [12]string{"ม . ค .", "ก . พ .", "มี . ค .", "เม . ย .", "พ . ค .", "มิ . ค .", "ก . ค .", "ส . ค .", "ก . ย .", "ต . ค .", "พ . ย .", "ธ . ค ."}
-	monthEng = [12]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	monthThai = [13]string{"ม . ค .", "ก . พ .", "มี . ค .", "เม . ย .", "พ . ค .", "มิ . ค .", "ก . ค .", "ส . ค .", "ก . ย .", "ต . ค .", "พ . ย .", "พ . ุ ย .", "ธ . ค ."}
+	monthEng = [13]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Nov", "Dec"}
 )
+
+func getLineImage(messageID string) ([]byte, error) {
+	content, err := Bot.GetMessageContent(messageID).Do()
+	if err != nil {
+		return nil, err
+	}
+	defer content.Content.Close()
+	buffer, _ := ioutil.ReadAll(content.Content)
+	return buffer, nil
+}
 
 func getDateTime(file []byte) (time.Time, string, bool){
 	text := detectText(file)
+	// log.Println(text)
 	rawDate := detectDate(text)
 	if len(rawDate) == 0 {
 		log.Println("No Date, skip this image")
@@ -58,7 +70,7 @@ func qrToDate(file []byte) (string, error) {
 }
 
 func detectDate(text string) string{
-	dateReg, _ := regexp.Compile("[0-9]{2,4} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(ธ . ค .)) [0-9]{2,4}")
+	dateReg, _ := regexp.Compile("[0-9]{2,4} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(พ . ุ ย .)|(ธ . ค .)) [0-9]{2,4}")
 	return dateReg.FindString(text)
 }
 

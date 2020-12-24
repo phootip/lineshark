@@ -2,11 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"strings"
 
-	"github.com/kr/pretty"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/phootip/lineshark/template"
 )
@@ -33,13 +31,11 @@ func handlerTextMessage(message *linebot.TextMessage, replyToken string) {
 
 func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userID string) {
 	log.Println("MessageID: ", message.ID)
-	content, err := Bot.GetMessageContent(message.ID).Do()
+	img, err := getLineImage(message.ID)
 	if err != nil {
 		log.Println(err)
 	}
-	defer content.Content.Close()
-	buffer, _ := ioutil.ReadAll(content.Content)
-	date, amount, ok := getDateTime(buffer)
+	date, amount, ok := getDateTime(img)
 	if !ok {
 		return
 	}
@@ -54,6 +50,7 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userI
 		"dateStr": dateStr,
 		"amount": amount,
 		"date": dateSheet,
+		"messageID": message.ID,
 	}
 	flexMsg := template.ConfirmTemplate(data)
 	if _, err := Bot.ReplyMessage(replyToken, flexMsg).Do(); err != nil {
@@ -67,6 +64,6 @@ func handlerPostback(event *linebot.Event) {
 	log.Println(event.Postback.Data)
 	data := make(map[string]string)
 	json.Unmarshal([]byte(event.Postback.Data), &data)
-	
-	pretty.Print(data)
+	msg := addTransaction(data)
+	LineReplyMessage(event.ReplyToken,msg)
 }

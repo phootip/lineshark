@@ -1,14 +1,18 @@
 package controller
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/labstack/echo/v4"
@@ -165,8 +169,7 @@ func addTransaction(data map[string]string) string {
 		return "Transaction นี้ได้ถูกบันทึกไปแล้ว"
 	}
 
-	url, err := uploadEvidence("temp")
-
+	url, err := uploadEvidence(data)
 	if err != nil {
 		log.Println(err)
 		return "Something went wrong"
@@ -190,14 +193,41 @@ func contains(s [][]interface{}, v string) bool {
 	return false
 }
 
-func uploadEvidence(filePath string) (string, error) {
-	a, err := photoAPI.Albums.List().Do()
-	log.Println(err)
-	for _, album := range a.Albums {
-		log.Println(album.Title, album.Id)
-	}
-	media, err := photoAPI.AddMediaItem(ctx, filePath, os.Getenv("ALBUM_ID"))
+func uploadEvidence(data map[string]string) (string, error) {
+	log.Println("Uploading evidence")
+	temp, _ := time.Parse("1/2/2006 15:04:05", data["date"])
+	date := temp.Format("01022006-15:04:05")
+	fileName := data["parcel"] + "-" + date
+	imgByte, err := getLineImage(data["messageID"])
 	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	img, _, err := image.Decode(bytes.NewReader(imgByte))
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	filePath := fmt.Sprintf("./evidence/%v.jpeg",fileName)
+	log.Println(filePath)
+	// filePath := "./img.jpeg"
+	out, _ := os.Create(filePath)
+	defer out.Close()
+	err = jpeg.Encode(out, img, nil)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	
+	a, err := photoAPI.GetOrCreateAlbumByName("lineshark")
+	media, err := photoAPI.AddMediaItem(ctx, filePath, a.Id)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	err = os.Remove(filePath)
+	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 	return media.ProductUrl, nil
