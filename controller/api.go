@@ -42,15 +42,13 @@ func handlerSms(c echo.Context) error {
 // Temp for testing
 func Temp() {
 	log.Println("running Temp func....")
-	// writeRange := "A3"
-	// var vr sheets.ValueRange
-	
-	// myval := []interface{}{``}
-	// vr.Values = append(vr.Values, myval)
-	// _, err := Sheet.Spreadsheets.Values.Update(spreadSheetID, writeRange, &vr).ValueInputOption("RAW").Do()
-	// if err != nil {
-	// 	log.Fatalf("Unable to retrieve data from sheet. %v", err)
-	// 	return err
+	log.Println(uploadEvidence("./template/example.jpg"))
+	// data := map[string]string{
+	// 	"amount":"10,000.00", 
+	// 	"date":"11/29/2020 10:07:00", 
+	// 	"dateStr":"29 Nov 2020, 10:07", 
+	// 	"parcel":"15",
 	// }
-	// return c.String(http.StatusOK, "value written")
+	// err := addTransaction(data)
+	// log.Println(err)
 }

@@ -21,30 +21,19 @@ var (
 
 func getDateTime(file []byte) (time.Time, string, bool){
 	text := detectText(file)
-	rawDate, err := qrToDate(file)
-	if err != nil {
-		if err.Error() == "NotFoundException: startSize = 0" {
-			log.Println("No QRcode found, trying OCR...")
-			rawDate = detectDate(text)
-			if len(rawDate) == 0 {
-				log.Println("No Date, skip")
-				return time.Now(), "", false
-			}
-			rawDate = monthThaiToEng(rawDate)
-		} else {
-			log.Printf("%v, %t",err, err)
-		}
+	rawDate := detectDate(text)
+	if len(rawDate) == 0 {
+		log.Println("No Date, skip this image")
+		return time.Now(), "", false
 	}
+	rawDate = monthThaiToEng(rawDate)
+	log.Println(rawDate)
 	rawTime := detectTime(text)
 	rawAmount := detectAmount(text)
 	rawDate += ", " + rawTime
 	layout := "20060102, 15:04"
 	t, _ := time.Parse(layout, rawDate)
 	return t, rawAmount, true
-	// TODO: move this comment
-	// newLayout := "1/2/2006 15:04"
-	// date := t.Format(newLayout)
-	// return date, rawAmount, true
 }
 
 func qrToDate(file []byte) (string, error) {
@@ -62,6 +51,7 @@ func qrToDate(file []byte) (string, error) {
 		return "", err
 	}
 	code := result.String()
+	log.Println(code)
 	temp := findTag(code, "00")
 	temp = findTag(temp, "02")
 	return temp[:8], nil

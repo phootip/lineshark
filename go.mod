@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	cloud.google.com/go v0.74.0
+	github.com/gphotosuploader/google-photos-api-client-go v1.1.5
+	github.com/gphotosuploader/google-photos-api-client-go/v2 v2.1.1 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.1
 	github.com/labstack/echo/v4 v4.1.17

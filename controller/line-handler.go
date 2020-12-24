@@ -44,10 +44,10 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userI
 		return
 	}
 	parcel := clientParcel[userID]
-	humanLayout := "2 jan 2006, 15:04"
+	humanLayout := "2 Jan 2006, 15:04"
 	dateStr := date.Format(humanLayout)
 
-	sheetLayout := "1/2/2006 15:04"
+	sheetLayout := "1/2/2006 15:04:05"
 	dateSheet := date.Format(sheetLayout)
 	data := map[string]string{
 		"parcel": parcel,
@@ -56,7 +56,7 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userI
 		"date": dateSheet,
 	}
 	flexMsg := template.ConfirmTemplate(data)
-	if _, err := Bot.PushMessage(TestUser, flexMsg).Do(); err != nil {
+	if _, err := Bot.ReplyMessage(replyToken, flexMsg).Do(); err != nil {
 		log.Println(err)
 	}
 	_, _, _ = parcel,dateStr, amount
@@ -67,5 +67,6 @@ func handlerPostback(event *linebot.Event) {
 	log.Println(event.Postback.Data)
 	data := make(map[string]string)
 	json.Unmarshal([]byte(event.Postback.Data), &data)
+	
 	pretty.Print(data)
 }

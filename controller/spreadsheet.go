@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,8 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/net/context"
+	gphotos "github.com/gphotosuploader/google-photos-api-client-go/lib-gphotos"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/text/language"
@@ -21,25 +23,29 @@ import (
 var (
 	// Sheet sigleton
 	Sheet *sheets.Service
+	photoAPI *gphotos.Client
 	spreadSheetID string
 	monthToDiscount map[string]int
 	p *message.Printer
+	ctx context.Context
 )
 
 // InitSpreadSheetClient init the sheet
 func init() {
+	ctx = context.Background()
 	log.Println("Initialize SpreadSheet....")
 	b, err := ioutil.ReadFile("credentials/credentials.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
-	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
+	config, err := google.ConfigFromJSON(b)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 	
 	client := getClient(config)
-	Sheet, err = sheets.New(client)
+	Sheet, _ = sheets.New(client)
+	photoAPI, _ = gphotos.NewClient(client)
 	spreadSheetID = os.Getenv("SPREEDSHEET_ID")
 	monthToDiscount = map[string]int{
 		"40เดือน": 50000,
@@ -140,10 +146,59 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 
 func getSheetValues(id string) [][]interface{} {
 	readRange := id+"!A71:H71"
-	resp, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
+	valueRange, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
 	if err != nil {
 		log.Printf("Unable to retrieve data from sheet: %v\n", err)
 		return nil
 	}
-	return resp.Values
+	return valueRange.Values
+}
+
+func addTransaction(data map[string]string) string {
+	readRange := fmt.Sprintf("'%v'!J2:L1000", data["parcel"])
+	valueRange, err := Sheet.Spreadsheets.Values.Get(spreadSheetID, readRange).Do()
+	if err != nil {
+		log.Printf("Unable to retrieve data from sheet: %v\n", err)
+		return "Something went wrong"
+	}
+	if contains(valueRange.Values, data["date"]) {
+		return "Transaction นี้ได้ถูกบันทึกไปแล้ว"
+	}
+
+	url, err := uploadEvidence("temp")
+
+	if err != nil {
+		log.Println(err)
+		return "Something went wrong"
+	}
+
+	valueRange.Values = append(valueRange.Values, []interface{}{data["date"],data["amount"],url})
+	_, err = Sheet.Spreadsheets.Values.Update(spreadSheetID, readRange, valueRange).ValueInputOption("USER_ENTERED").Do()
+	if err != nil {
+		log.Printf("Unable to write data to sheet. %v", err)
+		return "Something went wrong"
+	}
+	return "บันทึกเรียบร้อย"
+}
+
+func contains(s [][]interface{}, v string) bool {
+	for _, a := range s {
+		if a[0] == v {
+			return true
+		}
+	}
+	return false
+}
+
+func uploadEvidence(filePath string) (string, error) {
+	a, err := photoAPI.Albums.List().Do()
+	log.Println(err)
+	for _, album := range a.Albums {
+		log.Println(album.Title, album.Id)
+	}
+	media, err := photoAPI.AddMediaItem(ctx, filePath, os.Getenv("ALBUM_ID"))
+	if err != nil {
+		return "", err
+	}
+	return media.ProductUrl, nil
 }
