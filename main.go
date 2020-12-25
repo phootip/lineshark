@@ -22,7 +22,7 @@ func main() {
     Addr: ":" + config.Port,
   }
 
-  // controller.Temp()
+  controller.Temp()
 
 	server.Logger.Fatal(server.StartServer(option))
 }

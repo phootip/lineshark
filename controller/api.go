@@ -42,4 +42,12 @@ func handlerSms(c echo.Context) error {
 // Temp for testing
 func Temp() {
 	log.Println("running Temp func....")
+	// data := map[string]string{
+	// 	"amount":"35,000.00",
+	// 	"date":"12/25/2020 17:03:00",
+	// 	"dateStr":"25 Dec 2020, 17:03",
+	// 	"messageID":"13265349866930",
+	// 	"parcel":"15",
+	// }
+	// addTransaction(data)
 }
