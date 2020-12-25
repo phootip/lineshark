@@ -41,6 +41,10 @@ func handlerImageMessage(message *linebot.ImageMessage, replyToken string, userI
 		return
 	}
 	parcel := clientParcel[userID]
+	if parcel == "" {
+		log.Println("Can't find parcel for this client")
+		return
+	}
 	humanLayout := "2 Jan 2006, 15:04"
 	dateStr := date.Format(humanLayout)
 
