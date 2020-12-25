@@ -3,11 +3,11 @@ module github.com/phootip/lineshark
 go 1.15
 
 require (
-	cloud.google.com/go v0.74.0
+	cloud.google.com/go v0.74.0 // indirect
 	github.com/gphotosuploader/google-photos-api-client-go v1.1.5
-	github.com/gphotosuploader/google-photos-api-client-go/v2 v2.1.1 // indirect
+	github.com/gphotosuploader/googlemirror v0.5.0 // indirect
 	github.com/joho/godotenv v1.3.0
-	github.com/kr/pretty v0.2.1
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/line/line-bot-sdk-go v7.7.0+incompatible
 	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
@@ -19,4 +19,5 @@ require (
 	golang.org/x/text v0.3.4
 	google.golang.org/api v0.36.0
 	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

@@ -25,7 +25,8 @@ func handlerTextMessage(message *linebot.TextMessage, replyToken string) {
 		report := getFutureReport(id, month)
 		LineReplyFlex(replyToken, report)
 	default:
-		LineReplyMessage(replyToken, "Unknown command")
+		return
+		// LineReplyMessage(replyToken, "Unknown command")
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -38,10 +37,11 @@ var (
 func init() {
 	ctx = context.Background()
 	log.Println("Initialize SpreadSheet....")
-	b, err := ioutil.ReadFile("credentials/credentials.json")
-	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
-	}
+	// b, err := ioutil.ReadFile("credentials/credentials.json")
+	// if err != nil {
+	// 	log.Fatalf("Unable to read client secret file: %v", err)
+	// }
+	b := []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 	config, err := google.ConfigFromJSON(b)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
@@ -129,8 +129,8 @@ func getClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := "credentials/token.json"
-	tok, err := tokenFromFile(tokFile)
+	// tok, err := tokenFromFile("credentials/token.json")
+	tok, err := tokenFromENV()
 	if err != nil {
 		log.Fatal("SpreadSheet Token Error: ", err)
 	}
@@ -145,6 +145,13 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	defer f.Close()
 	tok := &oauth2.Token{}
 	err = json.NewDecoder(f).Decode(tok)
+	return tok, err
+}
+
+func tokenFromENV() (*oauth2.Token, error) {
+	f := os.Getenv("OAUTH_TOKEN")
+	tok := &oauth2.Token{}
+	err := json.NewDecoder(bytes.NewReader([]byte(f))).Decode(tok)
 	return tok, err
 }
 
