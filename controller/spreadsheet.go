@@ -52,8 +52,8 @@ func init() {
 	photoAPI, _ = gphotos.NewClient(client)
 	spreadSheetID = os.Getenv("SPREEDSHEET_ID")
 	monthToDiscount = map[string]int{
-		"40เดือน": 50000,
-		"50เดือน": 25000,
+		"40": 50000,
+		"50": 25000,
 	}
 	p = message.NewPrinter(language.English)
 }
@@ -94,7 +94,7 @@ func getFutureReport(id string, month string) []byte{
 	data := make(map[string]string)
 	
 	data["month"] = month
-	data["discount"] = p.Sprint(discount)
+	data["discount"] = p.Sprint(discount) + ".00"
 	data["id"] = values[0][0].(string)
 	data["monthOrder"] = values[0][2].(string)
 	data["expectedAccu"] = values[0][4].(string)
@@ -105,7 +105,7 @@ func getFutureReport(id string, month string) []byte{
 	currentMonth, _ := strconv.Atoi(values[0][2].(string))
 	goalMonth, _ := strconv.Atoi(month[:2])
 	
-	data["newGoal"] = p.Sprint(goal - discount)
+	data["newGoal"] = p.Sprint(goal - discount) + ".00"
 	data["remainingMonth"] = p.Sprint(goalMonth - currentMonth)
 	data["avgInstallment"] = p.Sprint(float64((goal-discount)/(goalMonth-currentMonth)))
 	

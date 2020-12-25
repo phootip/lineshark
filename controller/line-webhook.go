@@ -20,7 +20,12 @@ var (
 	futureTemplate []byte
 	confirmTemplate []byte
 	knownClient map[string]bool
-	clientParcel = map[string]string{TestUser: os.Getenv("TEST_PARCEL")}
+	clientParcel = map[string]string{
+		TestUser: os.Getenv("TEST_PARCEL"),
+		os.Getenv("USER_15"): "15",
+		os.Getenv("USER_16"): "16",
+		os.Getenv("USER_17"): "17",
+	}
 )
 
 func init() {
@@ -44,6 +49,7 @@ func init() {
 	knownClient = map[string]bool{
 		TestUser: true,
 		os.Getenv("TEST_GROUP"): true,
+		os.Getenv("PROD_GROUP"): true,
 	}
 }
 
