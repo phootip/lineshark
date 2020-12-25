@@ -28,7 +28,7 @@ func init() {
 // Start to start server
 func Start(config *config.Configuration) {
 	option := &http.Server{
-    Addr: config.Address,
+    Addr: config.Port,
   }
 	Server.Logger.Fatal(Server.StartServer(option))
 }

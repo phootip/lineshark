@@ -19,7 +19,7 @@ func main() {
   controller.InitAPI(server.Group("/api"))
   controller.InitSheetRoute(server.Group("/sheet"))
 	option := &http.Server{
-    Addr: config.Address,
+    Addr: ":" + config.Port,
   }
 
   // controller.Temp()

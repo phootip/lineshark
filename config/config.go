@@ -9,7 +9,7 @@ import (
 
 // Configuration enable other app usage
 type Configuration struct {
-	Address	string `env:"ADDRESS"`
+	Port	string `env:"Port"`
 }
 
 func init() {
@@ -20,7 +20,7 @@ func init() {
 // InitConfig load configuration once
 func InitConfig() (*Configuration, error){
 	cfg := Configuration{
-		os.Getenv("ADDRESS"),
+		os.Getenv("PORT"),
 	}
 
 	return &cfg, nil
