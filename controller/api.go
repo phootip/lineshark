@@ -50,4 +50,7 @@ func Temp() {
 	// 	"parcel":"15",
 	// }
 	// addTransaction(data)
+	// f,_ := ioutil.ReadFile("template/15.jpg")
+	// t,amount,ok := getDateTime(f)
+	// log.Println(t,amount,ok)
 }

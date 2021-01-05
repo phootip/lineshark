@@ -70,7 +70,7 @@ func qrToDate(file []byte) (string, error) {
 }
 
 func detectDate(text string) string{
-	dateReg, _ := regexp.Compile("[0-9]{2,4} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(พ . ุ ย .)|(ธ . ค .)) [0-9]{2,4}")
+	dateReg, _ := regexp.Compile("[0-9]{1,2} ((ม . ค .)|(ก . พ .)|(มี . ค .)|(เม . ย .)|(พ . ค .)|(มิ . ค .)|(ก . ค .)|(ส . ค .)|(ก . ย .)|(ต . ค .)|(พ . ย .)|(พ . ุ ย .)|(ธ . ค .)) [0-9]{2,4}")
 	return dateReg.FindString(text)
 }
 
