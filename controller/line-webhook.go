@@ -65,8 +65,8 @@ func HandlerCallback(c echo.Context) error{
 		return err
 	}
 	for _, event := range events {
-		// log.Println("Sender user: ", event.Source.UserID)
-		// log.Println("Sender group: ", event.Source.GroupID)
+		log.Println("Sender user: ", event.Source.UserID)
+		log.Println("Sender group: ", event.Source.GroupID)
 		if !(knownClient[event.Source.UserID] || knownClient[event.Source.GroupID]) {
 			log.Println("User not allowed")
 			return c.String(http.StatusOK, "Your Line user is not allowed") 
